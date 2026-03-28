@@ -13,21 +13,25 @@ class _LoadingState extends State<Loading> {
   void setupWorldTime() async {
     WorldTime instance = WorldTime(
       location: 'Berlin',
-      flag: 'germany.png',
       url: 'Europe/Berlin',
+      countryCode: 'DE',
     );
+
     await instance.getTime();
     if (!mounted) {
       return;
     }
+
     Navigator.pushReplacementNamed(
       context,
-      "/home",
+      '/home',
       arguments: {
-        "location": instance.location,
-        "flag": instance.flag,
-        "time": instance.time,
-        "isDaytime": instance.isDaytime,
+        'location': instance.location,
+        'time': instance.time,
+        'date': instance.date,
+        'isDaytime': instance.isDaytime,
+        'countryCode': instance.countryCode,
+        'url': instance.url,
       },
     );
   }
@@ -41,8 +45,33 @@ class _LoadingState extends State<Loading> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue[900],
-      body: Center(child: SpinKitFadingCube(color: Colors.white, size: 50.0)),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF0B3C5D), Color(0xFF328CC1), Color(0xFFD9B310)],
+          ),
+        ),
+        child: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SpinKitFadingCube(color: Colors.white, size: 56.0),
+              SizedBox(height: 20),
+              Text(
+                'Preparing your world clock...',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.3,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

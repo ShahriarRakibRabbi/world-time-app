@@ -3,52 +3,58 @@ import 'dart:convert';
 import 'package:intl/intl.dart';
 
 class WorldTime {
-  // location name for the UI
   String? location;
-  //the time in that location
   String? time;
-  // url for an asset flag icon
-  String? flag;
-  // location url for api endpoint
+  String? date;
+  String? countryCode;
   String? url;
-  // true or false if daytime or not
   bool? isDaytime;
 
-  WorldTime({this.location, this.flag, this.url});
+  WorldTime({this.location, this.countryCode, this.url});
+
+  String getFlagImageUrl() {
+    final code = (countryCode ?? 'UN').toLowerCase();
+    return 'https://flagcdn.com/w80/$code.png';
+  }
 
   Future<void> getTime() async {
     try {
-      // make a request
       Response response = await get(
-        Uri.parse("https://time.now/developer/api/timezone/$url"),
-        headers: {"User-Agent": "Mozilla/5.0", "Accept": "application/json"},
+        Uri.parse('https://time.now/developer/api/timezone/$url'),
+        headers: {'User-Agent': 'Mozilla/5.0', 'Accept': 'application/json'},
       );
 
       if (response.statusCode != 200) {
         throw Exception('Failed to load timezone data: ${response.statusCode}');
       }
 
-      Map data = jsonDecode(response.body);
-      //print(data);
-      // get properties from data
-      String datetime = data["utc_datetime"];
-      String utcOffset = data["utc_offset"];
-      int offsetHours = int.parse(utcOffset.substring(1, 3));
-      if (utcOffset.startsWith('-')) {
-        offsetHours = -offsetHours;
+      final Map<String, dynamic> data = jsonDecode(response.body);
+      final String datetime =
+          data['utc_datetime']?.toString() ??
+          data['datetime']?.toString() ??
+          '';
+      final String utcOffset = data['utc_offset']?.toString() ?? '+00:00';
+
+      if (datetime.isEmpty) {
+        throw Exception('Datetime missing from API response');
       }
-      // print(datetime);
-      // print(offset);
 
-      // create DateTime object
       DateTime now = DateTime.parse(datetime);
-      now = now.add(Duration(hours: offsetHours));
 
-      // set time property
-      isDaytime = (now.hour > 6 && now.hour < 20) ? true : false;
+      final int sign = utcOffset.startsWith('-') ? -1 : 1;
+      final int offsetHours = int.parse(utcOffset.substring(1, 3));
+      final int offsetMinutes = int.parse(utcOffset.substring(4, 6));
+      now = now.add(
+        Duration(hours: sign * offsetHours, minutes: sign * offsetMinutes),
+      );
+
+      isDaytime = now.hour >= 6 && now.hour < 19;
       time = DateFormat.jm().format(now);
+      date = DateFormat('EEE, dd MMM yyyy').format(now);
     } catch (e) {
-      time = "could not get time data";
+      time = 'Could not load time';
+      date = 'Please try another location';
+      isDaytime = true;
     }
   }
 }
