@@ -47,3 +47,98 @@ app.*.map.json
 # Private local notes (never commit)
 /private-notes/
 *.local.md
+
+# -----------------------------------------------------------------------------
+# PROJECT UPDATE NOTES (for future self)
+# Date: 2026-03-28
+# Commit: 59038bb
+# Purpose: Keep a compact technical journal of what changed and why.
+# -----------------------------------------------------------------------------
+
+# 1) APP BOOTSTRAP + THEME (lib/main.dart)
+# Before:
+#   runApp(MaterialApp(
+#     initialRoute: "/",
+#     routes: {"/": (context) => Loading()}
+#   ));
+# After:
+#   runApp(const WorldTimeApp());
+#   class WorldTimeApp extends StatelessWidget { ... MaterialApp(...theme...) }
+# Why better:
+#   - Cleaner structure: app config moved to dedicated widget.
+#   - Easier scaling: theme/routes are centralized.
+#   - Better UI baseline: Material 3 + seeded color scheme.
+
+# 2) LOADING SCREEN UX (lib/pages/loading.dart)
+# Before:
+#   backgroundColor: Colors.blue[900]
+#   body: SpinKitFadingCube(...)
+# After:
+#   body: Container(
+#     decoration: BoxDecoration(gradient: LinearGradient(...)),
+#     child: Column(children: [SpinKitFadingCube(...), Text('Preparing...')])
+#   )
+# Why better:
+#   - More polished first impression.
+#   - Communicates progress with text.
+#   - Better visual depth via gradient instead of flat color.
+
+# 3) HOME SCREEN REDESIGN (lib/pages/home.dart)
+# Before:
+#   Background image asset day/night and simple text layout.
+#   TextButton "Edit Location".
+# After:
+#   Dynamic day/night gradient method.
+#   Modern card layout, greeting, date, timezone, filled CTA button.
+#   Online flag rendering via URL built from country code.
+# Why better:
+#   - Strong visual hierarchy and readability.
+#   - Better mobile ergonomics (bigger tappable controls).
+#   - Day/night mood feels intentional and calm.
+
+# 4) LOCATION PICKER IMPROVEMENTS (lib/pages/choose_location.dart)
+# Before:
+#   Hardcoded local flag assets and no search.
+#   updateTime(int index)
+# After:
+#   Added TextField search + filteredLocations getter.
+#   Country code based locations.
+#   updateTime(WorldTime instance)
+#   List tiles show online flags and timezone subtitle.
+# Why better:
+#   - Faster city discovery with search.
+#   - More maintainable code by passing object instead of index.
+#   - Removes manual flag image management burden.
+
+# 5) TIME SERVICE HARDENING (lib/services/world_time.dart)
+# Before:
+#   Fields: location/time/flag/url/isDaytime
+#   Offset parse used hours only.
+#   Fallback message only for time.
+# After:
+#   Fields: location/time/date/countryCode/url/isDaytime
+#   getFlagImageUrl() => https://flagcdn.com/w80/{code}.png
+#   Offset parse handles hours + minutes.
+#   Robust datetime fallback and clearer error state.
+# Why better:
+#   - Correct for half-hour and quarter-hour time zones.
+#   - Cleaner data model for UI.
+#   - Better resilience when API payload changes.
+
+# 6) AUTO FLAG STRATEGY
+# Source used:
+#   https://flagcdn.com (free static CDN by country code)
+# Example:
+#   countryCode: "BD" -> https://flagcdn.com/w80/bd.png
+# Why better:
+#   - No manual browser downloads per country.
+#   - Easy to scale to many locations.
+
+# 7) PRIVATE LEARNING NOTES
+# Added ignore entries:
+#   /private-notes/
+#   *.local.md
+# Why better:
+#   - Personal notes stay local by default.
+#   - Prevents accidental push of sensitive/self-study content.
+
